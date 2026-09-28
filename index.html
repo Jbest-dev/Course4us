@@ -1,186 +1,374 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="utf-8">
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Menu royal – Chez Huang</title>
+<title>Liste de courses</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-  :root {
-    box-sizing: border-box;
-    padding-top: env(safe-area-inset-top, 0px);
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-    --bg: #fbf8f3; --ink: #1c1a17; --soft: #5b554c; --tile: #ffffff;
-    --line: #d9d1c4; --accent: #a8201a; --accent-ink: #ffffff; --chosen: #f6e3df;
+:root{
+  --bg:#F1F6EE; --ink:#213B2C; --soft:#5E7866; --card:#FFFFFF; --line:#D9E6D3;
+  --green:#2F8F5B; --green-ink:#FFFFFF; --chip:#E6F0E1; --tomato:#E2553F;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#16211A; --ink:#E7F1E3; --soft:#9DB5A3; --card:#1F2D24; --line:#2E4234;
+    --green:#5CC28A; --green-ink:#10301F; --chip:#27392D; --tomato:#F07A64;
   }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #1b1917; --ink: #f4efe7; --soft: #c9c0b3; --tile: #26231f;
-      --line: #4a443c; --accent: #e0574e; --accent-ink: #1b1917; --chosen: #3b2522;
-    }
-  }
-  *, *::before, *::after { box-sizing: inherit; }
-  body {
-    margin: 0; background: var(--bg); color: var(--ink);
-    font-family: -apple-system, "Segoe UI", Roboto, Verdana, Arial, sans-serif;
-    font-size: 22px; line-height: 1.4;
-  }
-  main { max-width: 760px; margin: 0 auto; padding: 24px 20px 48px; }
-  .step { color: var(--soft); font-size: 1.1rem; margin: 0; }
-  h1 { font-size: 2.2rem; line-height: 1.15; margin: 0 0 8px; }
-  .help { color: var(--soft); margin: 0 0 24px; font-size: 1.15rem; }
-  .options { display: grid; gap: 14px; }
-  .opt {
-    display: flex; align-items: center; gap: 18px; width: 100%;
-    min-height: 84px; padding: 14px 20px; text-align: left;
-    font: inherit; font-size: 1.5rem; font-weight: 700; color: var(--ink);
-    background: var(--tile); border: 3px solid var(--line); border-radius: 14px; cursor: pointer;
-  }
-  .opt .emo { font-size: 2.1rem; width: 2.6rem; text-align: center; flex: none; }
-  .opt.on { border-color: var(--accent); background: var(--chosen); }
-  .nav { display: flex; gap: 14px; margin-top: 28px; flex-wrap: wrap; }
-  .btn {
-    font: inherit; font-size: 1.35rem; font-weight: 700; padding: 18px 26px;
-    border-radius: 14px; cursor: pointer; min-height: 70px;
-    border: 3px solid var(--ink); background: transparent; color: var(--ink);
-  }
-  a.btn { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; text-align: center; }
-  .btn.main { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); flex: 1; }
-  .dots { display: flex; gap: 10px; margin-bottom: 18px; }
-  .dots span { height: 10px; flex: 1; border-radius: 5px; background: var(--line); }
-  .dots span.done { background: var(--accent); }
-  .recap { list-style: none; padding: 0; margin: 0 0 8px; }
-  .recap li { display: flex; gap: 18px; align-items: center; padding: 18px 0; border-bottom: 2px solid var(--line); font-size: 1.6rem; font-weight: 700; }
-  .recap li small { display: block; font-size: 1.05rem; font-weight: 400; color: var(--soft); }
-  .recap .emo { font-size: 2.2rem; width: 2.8rem; text-align: center; }
-  button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
-  .top { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 6px; min-height: 56px; }
-  .back { font: inherit; font-size: 1.1rem; font-weight: 700; color: var(--ink); background: transparent; border: 3px solid var(--ink); border-radius: 12px; padding: 10px 16px; min-height: 56px; cursor: pointer; }
-  .name {
-    width: 100%; font: inherit; font-size: 1.6rem; font-weight: 700; color: var(--ink);
-    background: var(--tile); border: 3px solid var(--line); border-radius: 14px;
-    padding: 18px 20px; min-height: 80px;
-  }
-  .name:focus { outline: none; border-color: var(--accent); }
-  .or { color: var(--soft); margin: 22px 0 10px; font-size: 1.15rem; }
-  .err { color: var(--accent); font-weight: 700; margin: 12px 0 0; min-height: 1.4em; }
-  .more { text-align: center; color: var(--soft); margin: 18px 0 0; font-size: 1.1rem; }
-  @media (max-width: 480px) {
-    body { font-size: 19px; }
-    main { padding: 14px 14px 32px; }
-    h1 { font-size: 1.9rem; }
-    .help { margin-bottom: 16px; }
-    .options { gap: 10px; }
-    .opt { font-size: 1.3rem; min-height: 72px; padding: 12px 14px; gap: 12px; }
-    .opt .emo { font-size: 1.8rem; width: 2.2rem; }
-    .recap li { font-size: 1.35rem; padding: 14px 0; }
-    .nav { flex-direction: column; }
-    .nav .btn { width: 100%; }
-  }
+}
+:root[data-theme="dark"]{
+  --bg:#16211A; --ink:#E7F1E3; --soft:#9DB5A3; --card:#1F2D24; --line:#2E4234;
+  --green:#5CC28A; --green-ink:#10301F; --chip:#27392D; --tomato:#F07A64;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif; line-height:1.5;}
+main{max-width:640px; margin:0 auto; padding:1.25rem 1rem 6rem;}
+h1{font-family:"Fredoka","Arial Rounded MT Bold",system-ui,sans-serif; font-weight:700; font-size:clamp(2rem,7vw,2.8rem); line-height:1.05; margin:.5rem 0 .2rem;}
+.status{font-size:.88rem; color:var(--soft); margin:0 0 1.25rem; display:flex; align-items:center; gap:.4rem;}
+.status i{width:8px; height:8px; border-radius:50%; background:var(--soft); display:inline-block;}
+.status.shared i{background:var(--green);}
+
+.tabs{display:flex; gap:.4rem; background:var(--chip); padding:.3rem; border-radius:999px; margin-bottom:1.25rem; position:sticky; top:env(safe-area-inset-top,0px); z-index:5;}
+.tab{flex:1; border:0; background:transparent; color:var(--ink); font:inherit; font-weight:800; padding:.6rem .5rem; border-radius:999px; cursor:pointer; display:flex; justify-content:center; align-items:center; gap:.45rem;}
+.tab[aria-selected="true"]{background:var(--card); box-shadow:0 1px 3px rgba(0,0,0,.08);}
+.badge{min-width:1.4rem; height:1.4rem; padding:0 .4rem; border-radius:999px; background:var(--tomato); color:#fff; font-size:.8rem; display:inline-flex; align-items:center; justify-content:center;}
+.badge[hidden]{display:none;}
+
+.row{display:flex; gap:.5rem;}
+input[type=text],select{font:inherit; color:var(--ink); background:var(--card); border:2px solid var(--line); border-radius:14px; padding:.6rem .8rem; min-width:0;}
+input[type=text]{flex:1;}
+button{font:inherit; cursor:pointer;}
+.btn{border:2px solid var(--green); background:var(--green); color:var(--green-ink); font-weight:800; border-radius:14px; padding:.55rem 1rem;}
+.btn.ghost{background:transparent; color:var(--ink); border-color:var(--line);}
+.btn.ghost:hover{border-color:var(--green);}
+.btn:disabled{opacity:.5; cursor:default;}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--green); outline-offset:2px;}
+
+.cat{margin-top:1.4rem;}
+.cat h2{font-family:"Fredoka",sans-serif; font-weight:600; font-size:1.05rem; margin:0 0 .55rem; display:flex; gap:.45rem; align-items:center;}
+.cat h2 small{font-family:"Nunito",sans-serif; font-weight:600; color:var(--soft); font-size:.85rem;}
+
+.chips{display:flex; flex-wrap:wrap; gap:.45rem;}
+.chip{position:relative; border:2px solid var(--line); background:var(--card); color:var(--ink); border-radius:999px; padding:.4rem .9rem; font-weight:700; transition:background .15s, border-color .15s;}
+.chip.on{background:var(--green); border-color:var(--green); color:var(--green-ink);}
+.chip.on::before{content:"✓ ";}
+.chip .x{display:none;}
+.pill{display:inline-flex; align-items:stretch;}
+.pill .chip{border-top-right-radius:0; border-bottom-right-radius:0; border-right:0;}
+.star{border:2px solid var(--line); border-left:1px solid var(--line); background:var(--card); color:var(--soft); border-radius:0 999px 999px 0; padding:0 .65rem 0 .5rem; font-size:1rem; line-height:1;}
+.star.on{color:#E0A800;}
+.pill .chip.on + .star{border-color:var(--green); border-left-color:rgba(255,255,255,.35); background:var(--green); color:var(--green-ink);}
+.pill .chip.on + .star.on{color:#FFD54A;}
+.editing .star{display:none;}
+.editing .pill .chip{border-radius:999px; border-right:2px solid var(--line);}
+.fav-head{display:flex; justify-content:space-between; align-items:center; gap:.5rem; flex-wrap:wrap; margin-bottom:.55rem;}
+.fav-head h2{margin:0;}
+#productName{flex:1 1 100%;} #productCat{flex:1;}
+.btn.small{padding:.3rem .8rem; font-size:.88rem; border-radius:999px;}
+.editing .chip{padding-right:2.1rem;}
+.editing .chip .x{display:flex; position:absolute; right:.3rem; top:50%; transform:translateY(-50%); width:1.5rem; height:1.5rem; border-radius:50%; background:var(--tomato); color:#fff; align-items:center; justify-content:center; font-size:.9rem; line-height:1;}
+.edit-bar{display:flex; justify-content:space-between; align-items:center; margin-top:.9rem; gap:.5rem; flex-wrap:wrap;}
+.hint{color:var(--soft); font-size:.9rem; margin:.6rem 0 0;}
+
+.items{list-style:none; margin:0; padding:0; background:var(--card); border:2px solid var(--line); border-radius:18px; overflow:hidden;}
+.item{display:flex; align-items:center; gap:.75rem; padding:.7rem .9rem; border-bottom:1px solid var(--line); cursor:pointer; user-select:none;}
+.item:last-child{border-bottom:0;}
+.box{width:1.5rem; height:1.5rem; border-radius:8px; border:2px solid var(--green); flex:none; display:flex; align-items:center; justify-content:center; color:var(--green-ink); font-weight:800; font-size:.9rem;}
+.item.done .box{background:var(--green);}
+.item.done .box::after{content:"✓";}
+.item .name{flex:1; font-weight:700; overflow-wrap:anywhere;}
+.item.done .name{text-decoration:line-through; color:var(--soft); font-weight:600;}
+.item .rm{border:0; background:transparent; color:var(--soft); width:2rem; height:2rem; border-radius:50%; font-size:1.2rem;}
+.item .rm:hover{color:var(--tomato);}
+
+.empty{text-align:center; padding:2.5rem 1rem; color:var(--soft);}
+.empty strong{display:block; font-family:"Fredoka",sans-serif; font-weight:600; font-size:1.3rem; color:var(--ink); margin-bottom:.3rem;}
+.actions{display:flex; gap:.5rem; flex-wrap:wrap; margin-top:1.25rem;}
+.toast{position:fixed; left:50%; bottom:calc(1.25rem + env(safe-area-inset-bottom,0px)); transform:translateX(-50%) translateY(calc(100% + 3rem)); visibility:hidden; background:var(--ink); color:var(--bg); padding:.6rem 1.1rem; border-radius:999px; font-weight:700; transition:transform .25s; z-index:20;}
+.toast.show{transform:translateX(-50%) translateY(0); visibility:visible;}
+[hidden]{display:none !important;}
+@media (prefers-reduced-motion:reduce){ .chip,.toast{transition:none;} }
 </style>
 </head>
 <body>
-<main id="app"></main>
+<main>
+  <h1>Les courses</h1>
+  <p class="status" id="status"><i></i><span>Chargement…</span></p>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" id="tab-list" aria-selected="true">La liste <span class="badge" id="count" hidden>0</span></button>
+    <button class="tab" role="tab" id="tab-products" aria-selected="false">Mes produits</button>
+  </div>
+
+  <!-- LISTE -->
+  <section id="view-list">
+    <form class="row" id="quickForm">
+      <input type="text" id="quickName" placeholder="Ajouter un article ponctuel…" maxlength="50" aria-label="Article ponctuel">
+      <button class="btn" type="submit">Ajouter</button>
+    </form>
+    <div id="listBody"></div>
+    <div class="actions" id="listActions" hidden>
+      <button class="btn ghost" id="removeDone">Retirer les articles cochés</button>
+      <button class="btn ghost" id="copy">Copier la liste</button>
+      <button class="btn ghost" id="clearList">Vider la liste</button>
+    </div>
+  </section>
+
+  <!-- PRODUITS -->
+  <section id="view-products" hidden>
+    <p class="hint" style="margin-top:0">Touchez vos produits habituels pour les mettre dans la liste, et l'étoile pour les garder en favoris.</p>
+    <form class="row" id="productForm" style="margin-top:.8rem; flex-wrap:wrap">
+      <input type="text" id="productName" placeholder="Nouveau produit…" maxlength="50" aria-label="Nouveau produit">
+      <select id="productCat" aria-label="Rayon"></select>
+      <button class="btn" type="submit">Créer</button>
+    </form>
+    <div id="productsBody"></div>
+    <div class="edit-bar">
+      <button class="btn ghost" id="toggleEdit">Supprimer des produits</button>
+    </div>
+  </section>
+</main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
 <script>
-// Mettez votre numéro ici (ex : "0612345678") pour que le SMS vous arrive directement.
-const TELEPHONE = "";
+(function(){
+  const CATS = [
+    ["fruits","🥕 Fruits & légumes"],["boulangerie","🥖 Boulangerie"],["cremerie","🧀 Crèmerie & œufs"],
+    ["viande","🍗 Viandes & poissons"],["epicerie","🍝 Épicerie"],["surgeles","🧊 Surgelés"],
+    ["boissons","🧃 Boissons"],["maison","🧻 Hygiène & maison"],["autre","🛒 Autre"]
+  ];
+  const CAT_LABEL = Object.fromEntries(CATS);
+  // Produits de départ, utilisés seulement quand la liste est enregistrée sur l'appareil
+  const LOCAL_DEFAULTS = [
+    ["Pommes","fruits"],["Bananes","fruits"],["Tomates","fruits"],["Salade","fruits"],["Oignons","fruits"],["Pommes de terre","fruits"],["Citrons","fruits"],
+    ["Baguette","boulangerie"],["Pain de mie","boulangerie"],
+    ["Lait","cremerie"],["Œufs","cremerie"],["Beurre","cremerie"],["Yaourts","cremerie"],["Fromage râpé","cremerie"],["Crème fraîche","cremerie"],
+    ["Poulet","viande"],["Jambon","viande"],["Steaks hachés","viande"],["Saumon","viande"],
+    ["Pâtes","epicerie"],["Riz","epicerie"],["Sauce tomate","epicerie"],["Huile d'olive","epicerie"],["Café","epicerie"],["Céréales","epicerie"],["Sucre","epicerie"],
+    ["Légumes surgelés","surgeles"],["Glaces","surgeles"],
+    ["Eau","boissons"],["Jus d'orange","boissons"],
+    ["Papier toilette","maison"],["Liquide vaisselle","maison"],["Lessive","maison"],["Sacs poubelle","maison"],["Dentifrice","maison"]
+  ];
 
-// Optionnel : mettez les prénoms ici pour qu'ils n'aient qu'à appuyer dessus.
-// Exemple : const PRENOMS = ["Papy", "Sophie", "Marc"];
-const PRENOMS = [];
+  const $ = id => document.getElementById(id);
+  const products = new Map(); // id -> {name, cat}
+  const list = new Map();     // id -> {name, cat, done, at}
+  let editing = false, mode = "loading", readOnly = false;
 
-const STEPS = [
-  { key: "entree", title: "Quelle entrée ?", label: "Entrée", items: [
-    ["🦐","3 bouchées de crevettes"],["🥢","3 nems au porc"],["🥢","3 nems au poulet"],
-    ["🥬","1 rouleau de printemps"],["🥟","3 raviolis japonais"],["🥟","3 raviolis pékinois grillés"],
-    ["🥟","3 bouchées au porc"]]},
-  { key: "plat", title: "Quelle viande ?", label: "Plat", items: [
-    ["🌶️","Bœuf sauté sauce piquante"],["🍗","Poulet croustillant du chef"],
-    ["🍯","Porc caramélisé"],["🍯","Poulet caramélisé"],["🌿","Poulet à la citronnelle"],
-    ["🐄","Bœuf aux oignons"],["🐔","Boulettes de poulet"],["🌶️","Poulet sauce piquante"]]},
-  { key: "acc", title: "Quel accompagnement ?", label: "Accompagnement", items: [
-    ["🍚","Riz cantonais"],["🍚","Riz thaïlandais"],["🍜","Nouilles sautées"],["🍚","Riz nature (blanc)"]]},
-  { key: "boisson", title: "Quelle boisson ?", label: "Boisson", items: [
-    ["🥤","Coca-Cola"],["🥤","Coca-Cola zéro"],["🍊","Fanta orange"],["🫧","San Pellegrino (eau pétillante)"],
-    ["💧","Evian (eau plate)"],["🍑","Ice Tea"],["🍊","Orangina"],["🍋","Schweppes agrumes"],
-    ["🍹","Tropico"],["🍓","Oasis"]]}
-];
-let step = -1;
-const picks = {};
-let prenom = "";
-const app = document.getElementById("app");
+  function slug(s){ return s.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,40) || "item"; }
+  function newId(name){ return slug(name) + "-" + Math.random().toString(36).slice(2,7); }
+  function toast(msg){ const t=$("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("show"),2200); }
 
-function esc(t) { return t.replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c])); }
-
-function dots(n) {
-  return '<div class="dots">' + STEPS.map((_, i) => `<span class="${i < n ? "done" : ""}"></span>`).join("") + "</div>";
-}
-
-function renderName() {
-  app.innerHTML = dots(0) +
-    `<h1>Bonjour ! Quel est votre prénom ?</h1>
-     <p class="help">${PRENOMS.length ? "Appuyez sur votre prénom." : "Écrivez votre prénom, puis appuyez sur Continuer."}</p>` +
-    (PRENOMS.length ? `<div class="options">` + PRENOMS.map(p =>
-      `<button class="opt pick" data-p="${p}"><span class="emo">🙂</span>${p}</button>`).join("") +
-      `</div><p class="or">Ou écrivez-le ici :</p>` : "") +
-    `<input class="name" id="name" type="text" autocomplete="given-name" autocapitalize="words" placeholder="Votre prénom" value="${esc(prenom)}">
-     <p class="err" id="err"></p>
-     <div class="nav"><button class="btn main" id="go">Continuer</button></div>`;
-  const next = () => { step = 0; render(); window.scrollTo(0, 0); };
-  app.querySelectorAll(".pick").forEach(b => b.onclick = () => {
-    prenom = b.dataset.p; b.classList.add("on"); setTimeout(next, 250);
-  });
-  const input = document.getElementById("name");
-  const go = () => {
-    const v = input.value.trim();
-    if (!v) { document.getElementById("err").textContent = "Écrivez votre prénom pour continuer."; input.focus(); return; }
-    prenom = v; next();
+  // ---------- Stockage : partagé (db) ou sur l'appareil ----------
+  const store = {
+    db:null,
+    async putProduct(id, data){ products.set(id,data); render(); if(this.db) await this.db.collection("products").doc(id).set(data); else saveLocal(); },
+    async delProduct(id){ products.delete(id); render(); if(this.db) await this.db.collection("products").doc(id).delete(); else saveLocal(); },
+    async putItem(id, data){ list.set(id,data); render(); if(this.db) await this.db.collection("list").doc(id).set(data); else saveLocal(); },
+    async delItem(id){ list.delete(id); render(); if(this.db) await this.db.collection("list").doc(id).delete(); else saveLocal(); }
   };
-  document.getElementById("go").onclick = go;
-  input.onkeydown = e => { if (e.key === "Enter") { input.blur(); go(); } };
-}
+  async function safe(fn){
+    try{ await fn(); }
+    catch(e){
+      if (e && e.code === "invalid_argument" && !readOnly){ readOnly = true; setStatus(); toast("Vous pouvez consulter la liste, mais pas la modifier."); }
+      else if (e && e.code === "quota_exceeded") toast("La liste est pleine : supprimez des produits.");
+      else toast("Modification non enregistrée, réessayez.");
+    }
+  }
 
-function render() {
-  if (step < 0) return renderName();
-  if (step >= STEPS.length) return renderRecap();
-  const s = STEPS[step];
-  app.innerHTML = dots(step) +
-    `<div class="top"><p class="step">Question ${step + 1} sur ${STEPS.length}</p>` +
-    `<button class="back" id="back">← Retour</button></div>
-     <h1>${s.title}</h1>
-     <p class="help">Appuyez sur votre choix.${s.items.length > 5 ? " Faites glisser vers le haut pour voir tous les choix." : ""}</p>
-     <div class="options">` +
-    s.items.map(([e, t], i) =>
-      `<button class="opt ${picks[s.key] === i ? "on" : ""}" data-i="${i}"><span class="emo">${e}</span>${t}</button>`
-    ).join("") + `</div>` +
-    (s.items.length > 5 ? `<p class="more">C'est la fin de la liste.</p>` : "");
-  app.querySelectorAll(".opt").forEach(b => b.onclick = () => {
-    picks[s.key] = +b.dataset.i;
-    b.classList.add("on");
-    setTimeout(() => { step++; render(); window.scrollTo(0, 0); }, 250);
+  const LKEY = "courses-v1";
+  function saveLocal(){ try{ localStorage.setItem(LKEY, JSON.stringify({p:[...products], l:[...list]})); }catch(e){} }
+  function startLocal(){
+    mode = "local";
+    let data = null;
+    try{ data = JSON.parse(localStorage.getItem(LKEY)); }catch(e){}
+    if (data && Array.isArray(data.p)){ data.p.forEach(([k,v])=>products.set(k,v)); (data.l||[]).forEach(([k,v])=>list.set(k,v)); }
+    else { LOCAL_DEFAULTS.forEach(([n,c])=>products.set(newId(n),{name:n,cat:c})); saveLocal(); }
+    setStatus(); render();
+  }
+
+  async function startShared(db){
+    store.db = db; mode = "shared"; setStatus();
+    let gotP = false, gotL = false;
+    db.collection("products").onSnapshot(snap=>{
+      products.clear(); snap.docs.forEach(d=>{ const v=d.data(); if(v) products.set(d.id,{name:v.name,cat:v.cat,fav:!!v.fav}); });
+      gotP = true; render();
+    }, ()=>{ mode="error"; setStatus(); });
+    db.collection("list").onSnapshot(snap=>{
+      list.clear(); snap.docs.forEach(d=>{ const v=d.data(); if(v) list.set(d.id,{name:v.name,cat:v.cat,done:!!v.done,at:v.at||0}); });
+      gotL = true; render();
+    }, ()=>{ mode="error"; setStatus(); });
+  }
+
+  function setStatus(){
+    const s = $("status"), span = s.querySelector("span");
+    s.classList.toggle("shared", mode === "shared");
+    span.textContent = mode === "shared" ? (readOnly ? "Liste partagée, en lecture seule" : "Liste partagée, mise à jour en direct")
+      : mode === "local" ? "Enregistrée sur cet appareil"
+      : mode === "error" ? "Connexion perdue, rechargez la page"
+      : "Chargement…";
+  }
+
+  // ---------- Rendu ----------
+  function byCat(entries){
+    const g = {}; entries.forEach(([id,v])=>{ (g[v.cat in CAT_LABEL ? v.cat : "autre"] ||= []).push([id,v]); });
+    return CATS.filter(([k])=>g[k]).map(([k,label])=>[k,label,g[k].sort((a,b)=>a[1].name.localeCompare(b[1].name,"fr"))]);
+  }
+
+  function renderList(){
+    const body = $("listBody"); body.innerHTML = "";
+    const entries = [...list];
+    const todo = entries.filter(([,v])=>!v.done).length;
+    $("count").textContent = todo; $("count").hidden = todo === 0;
+    $("listActions").hidden = entries.length === 0;
+    $("removeDone").disabled = !entries.some(([,v])=>v.done);
+    if (!entries.length){
+      body.innerHTML = '<div class="empty"><strong>La liste est vide</strong>Ajoutez vos produits habituels depuis l\'onglet « Mes produits ».</div>';
+      return;
+    }
+    byCat(entries).forEach(([k,label,items])=>{
+      const sec = document.createElement("div"); sec.className = "cat";
+      const h = document.createElement("h2"); h.textContent = label; sec.append(h);
+      const ul = document.createElement("ul"); ul.className = "items";
+      items.sort((a,b)=>a[1].done-b[1].done).forEach(([id,v])=>{
+        const li = document.createElement("li"); li.className = "item" + (v.done?" done":"");
+        li.setAttribute("role","checkbox"); li.setAttribute("aria-checked", v.done); li.tabIndex = 0;
+        const box = document.createElement("span"); box.className = "box";
+        const name = document.createElement("span"); name.className = "name"; name.textContent = v.name;
+        const rm = document.createElement("button"); rm.className = "rm"; rm.textContent = "×"; rm.setAttribute("aria-label","Retirer "+v.name);
+        rm.onclick = e => { e.stopPropagation(); safe(()=>store.delItem(id)); };
+        const toggle = () => safe(()=>store.putItem(id,{...v, done:!v.done}));
+        li.onclick = toggle;
+        li.onkeydown = e => { if (e.key===" "||e.key==="Enter"){ e.preventDefault(); toggle(); } };
+        li.append(box,name,rm); ul.append(li);
+      });
+      sec.append(ul); body.append(sec);
+    });
+  }
+
+  function renderProducts(){
+    const body = $("productsBody"); body.innerHTML = "";
+    body.classList.toggle("editing", editing);
+    $("toggleEdit").textContent = editing ? "Terminer" : "Supprimer des produits";
+    const entries = [...products];
+    if (!entries.length){
+      body.innerHTML = '<div class="empty"><strong>Aucun produit</strong>Créez vos produits habituels avec le champ ci-dessus.</div>';
+      return;
+    }
+    const favs = entries.filter(([,v])=>v.fav).sort((a,b)=>a[1].name.localeCompare(b[1].name,"fr"));
+    if (favs.length){
+      const sec = document.createElement("div"); sec.className = "cat";
+      const head = document.createElement("div"); head.className = "fav-head";
+      const h = document.createElement("h2"); h.textContent = "⭐ Mes favoris";
+      head.append(h);
+      const missing = favs.filter(([id])=>!list.has(id));
+      if (!editing && missing.length){
+        const all = document.createElement("button"); all.className = "btn small";
+        all.textContent = "Tout ajouter à la liste";
+        all.onclick = () => safe(async()=>{ for (const [id,v] of missing) await store.putItem(id,{name:v.name,cat:v.cat,done:false,at:Date.now()}); toast("Favoris ajoutés à la liste"); });
+        head.append(all);
+      }
+      sec.append(head);
+      const wrap = document.createElement("div"); wrap.className = "chips";
+      favs.forEach(e=>wrap.append(chip(...e)));
+      sec.append(wrap); body.append(sec);
+    }
+    byCat(entries).forEach(([k,label,items])=>{
+      const sec = document.createElement("div"); sec.className = "cat";
+      const h = document.createElement("h2"); h.textContent = label; sec.append(h);
+      const wrap = document.createElement("div"); wrap.className = "chips";
+      items.forEach(e=>wrap.append(chip(...e)));
+      sec.append(wrap); body.append(sec);
+    });
+  }
+
+  function chip(id, v){
+    const on = list.has(id);
+    const pill = document.createElement("span"); pill.className = "pill";
+    const b = document.createElement("button"); b.className = "chip" + (on?" on":"");
+    b.setAttribute("aria-pressed", on); b.textContent = v.name;
+    const x = document.createElement("span"); x.className = "x"; x.textContent = "×"; x.setAttribute("aria-hidden","true");
+    b.append(x);
+    b.onclick = () => {
+      if (editing){ if (confirm("Supprimer « "+v.name+" » de vos produits ?")) safe(async()=>{ await store.delProduct(id); if (list.has(id)) await store.delItem(id); }); return; }
+      if (list.has(id)) safe(()=>store.delItem(id));
+      else safe(()=>store.putItem(id,{name:v.name,cat:v.cat,done:false,at:Date.now()}));
+    };
+    const star = document.createElement("button"); star.className = "star" + (v.fav?" on":"");
+    star.textContent = v.fav ? "★" : "☆";
+    star.setAttribute("aria-pressed", !!v.fav);
+    star.setAttribute("aria-label", (v.fav ? "Retirer des favoris : " : "Mettre en favori : ") + v.name);
+    star.onclick = () => safe(()=>store.putProduct(id,{name:v.name,cat:v.cat,fav:!v.fav}));
+    pill.append(b, star);
+    return pill;
+  }
+
+  function render(){ renderList(); renderProducts(); }
+
+  // ---------- Actions ----------
+  const catSel = $("productCat");
+  CATS.forEach(([k,l])=>{ const o=document.createElement("option"); o.value=k; o.textContent=l; catSel.append(o); });
+
+  function showTab(which){
+    const isList = which === "list";
+    $("tab-list").setAttribute("aria-selected", isList); $("tab-products").setAttribute("aria-selected", !isList);
+    $("view-list").hidden = !isList; $("view-products").hidden = isList;
+  }
+  $("tab-list").onclick = () => showTab("list");
+  $("tab-products").onclick = () => showTab("products");
+
+  $("quickForm").onsubmit = e => {
+    e.preventDefault();
+    const n = $("quickName").value.trim(); if (!n) return;
+    $("quickName").value = "";
+    const existing = [...products].find(([,v])=>v.name.toLowerCase()===n.toLowerCase());
+    if (existing){ const [id,v]=existing; safe(()=>store.putItem(id,{name:v.name,cat:v.cat,done:false,at:Date.now()})); }
+    else safe(()=>store.putItem("x-"+newId(n),{name:n,cat:"autre",done:false,at:Date.now()}));
+  };
+
+  $("productForm").onsubmit = e => {
+    e.preventDefault();
+    const n = $("productName").value.trim(); if (!n) return;
+    if ([...products.values()].some(v=>v.name.toLowerCase()===n.toLowerCase())){ toast("« "+n+" » existe déjà."); return; }
+    $("productName").value = "";
+    safe(()=>store.putProduct(newId(n),{name:n,cat:catSel.value}));
+    toast("« "+n+" » ajouté à vos produits");
+  };
+
+  $("toggleEdit").onclick = () => { editing = !editing; renderProducts(); };
+
+  $("removeDone").onclick = () => safe(async()=>{
+    for (const [id,v] of [...list]) if (v.done) await store.delItem(id);
   });
-  document.getElementById("back").onclick = () => { step--; render(); window.scrollTo(0, 0); };
-}
+  $("clearList").onclick = () => {
+    if (!list.size || !confirm("Vider toute la liste ?")) return;
+    safe(async()=>{ for (const id of [...list.keys()]) await store.delItem(id); });
+  };
+  $("copy").onclick = async () => {
+    const lines = [];
+    byCat([...list].filter(([,v])=>!v.done)).forEach(([k,label,items])=>{
+      lines.push(label); items.forEach(([,v])=>lines.push("- "+v.name)); lines.push("");
+    });
+    const text = lines.join("\n").trim();
+    if (!text){ toast("Tout est déjà coché !"); return; }
+    try{ await navigator.clipboard.writeText(text); toast("Liste copiée"); }
+    catch(e){ toast("Copie impossible sur cet appareil"); }
+  };
 
-function renderRecap() {
-  app.innerHTML = dots(STEPS.length) +
-    `<h1>Voici votre menu, ${esc(prenom)}</h1>
-     <p class="help">C'est bon ? Appuyez sur le bouton rouge pour envoyer vos choix.</p>
-     <ul class="recap">` +
-    STEPS.map(s => { const [e, t] = s.items[picks[s.key]];
-      return `<li><span class="emo">${e}</span><span><small>${s.label}</small>${t}</span></li>`; }).join("") +
-    `</ul>
-     <div class="nav">
-       <a class="btn main" id="send" href="#">Envoyer mes choix par SMS</a>
-       <button class="btn" id="back">← Changer</button>
-       <button class="btn" id="again">Recommencer</button>
-     </div>`;
-  const texte = "Menu royal de " + prenom + " :\n" + STEPS.map(s => s.label + " : " + s.items[picks[s.key]][1]).join("\n");
-  const ios = /iPhone|iPad|iPod/.test(navigator.userAgent);
-  document.getElementById("send").href = "sms:" + TELEPHONE + (ios ? "&" : "?") + "body=" + encodeURIComponent(texte);
-  document.getElementById("back").onclick = () => { step = STEPS.length - 1; render(); };
-  document.getElementById("again").onclick = () => { for (const k in picks) delete picks[k]; prenom = ""; step = -1; render(); };
-}
-render();
+  // ---------- Démarrage ----------
+  render();
+  if (window.claude && typeof window.claude.use === "function"){
+    window.claude.use("db").then(db => db ? startShared(db) : startLocal()).catch(startLocal);
+  } else {
+    startLocal();
+  }
+})();
 </script>
 </body>
 </html>
