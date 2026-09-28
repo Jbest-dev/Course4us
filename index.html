@@ -70,6 +70,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid 
 .fav-head{display:flex; justify-content:space-between; align-items:center; gap:.5rem; flex-wrap:wrap; margin-bottom:.55rem;}
 .fav-head h2{margin:0;}
 #productName{flex:1 1 100%;} #productCat{flex:1;}
+.top{display:flex; justify-content:space-between; align-items:center; gap:.75rem;}
 .btn.small{padding:.3rem .8rem; font-size:.88rem; border-radius:999px;}
 .editing .chip{padding-right:2.1rem;}
 .editing .chip .x{display:flex; position:absolute; right:.3rem; top:50%; transform:translateY(-50%); width:1.5rem; height:1.5rem; border-radius:50%; background:var(--tomato); color:#fff; align-items:center; justify-content:center; font-size:.9rem; line-height:1;}
@@ -98,7 +99,10 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid 
 </head>
 <body>
 <main>
-  <h1>Les courses</h1>
+  <div class="top">
+    <h1>Les courses</h1>
+    <button class="btn ghost small" id="invite" hidden>Inviter</button>
+  </div>
   <p class="status" id="status"><i></i><span>Chargement…</span></p>
 
   <div class="tabs" role="tablist">
@@ -136,7 +140,24 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid 
 </main>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script>
+<script type="module">
+// Configuration Firebase du projet "course-107fd"
+const firebaseConfig = {
+  apiKey: "AIzaSyCATIu1tNBEfwUaCBnAEwr04geNjzAQ7Y4",
+  authDomain: "course-107fd.firebaseapp.com",
+  projectId: "course-107fd",
+  storageBucket: "course-107fd.firebasestorage.app",
+  messagingSenderId: "144957375090",
+  appId: "1:144957375090:web:ce28e00173f6466fc9f8eb"
+};
+// =====================================================================
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  initializeFirestore, persistentLocalCache, persistentMultipleTabManager,
+  collection, doc, setDoc, deleteDoc, onSnapshot, writeBatch
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
 (function(){
   const CATS = [
     ["fruits","🥕 Fruits & légumes"],["boulangerie","🥖 Boulangerie"],["cremerie","🧀 Crèmerie & œufs"],
@@ -144,7 +165,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid 
     ["boissons","🧃 Boissons"],["maison","🧻 Hygiène & maison"],["autre","🛒 Autre"]
   ];
   const CAT_LABEL = Object.fromEntries(CATS);
-  // Produits de départ, utilisés seulement quand la liste est enregistrée sur l'appareil
+  // Produits de départ, ajoutés à la création d'une nouvelle liste
   const LOCAL_DEFAULTS = [
     ["Pommes","fruits"],["Bananes","fruits"],["Tomates","fruits"],["Salade","fruits"],["Oignons","fruits"],["Pommes de terre","fruits"],["Citrons","fruits"],
     ["Baguette","boulangerie"],["Pain de mie","boulangerie"],
@@ -159,27 +180,34 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid 
   const $ = id => document.getElementById(id);
   const products = new Map(); // id -> {name, cat}
   const list = new Map();     // id -> {name, cat, done, at}
-  let editing = false, mode = "loading", readOnly = false;
+  let editing = false, mode = "loading";
 
   function slug(s){ return s.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,40) || "item"; }
   function newId(name){ return slug(name) + "-" + Math.random().toString(36).slice(2,7); }
   function toast(msg){ const t=$("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("show"),2200); }
 
-  // ---------- Stockage : partagé (db) ou sur l'appareil ----------
+  // ---------- Code de la liste partagée ----------
+  // Le lien de la page contient un code secret (#l=...) : toute personne qui a ce lien partage la même liste.
+  function randomCode(){ const a = new Uint8Array(20); crypto.getRandomValues(a); return Array.from(a, b => "abcdefghijkmnpqrstuvwxyz23456789"[b % 32]).join(""); }
+  let code = null;
+  const fromHash = (location.hash.match(/l=([a-z0-9]{16,40})/) || [])[1];
+  try{ code = fromHash || localStorage.getItem("courses-foyer"); }catch(e){ code = fromHash; }
+  if (!code) code = randomCode();
+  try{ localStorage.setItem("courses-foyer", code); }catch(e){}
+  history.replaceState(null, "", location.pathname + location.search + "#l=" + code);
+
+  // ---------- Stockage : Firebase (partagé) ou sur l'appareil ----------
   const store = {
     db:null,
-    async putProduct(id, data){ products.set(id,data); render(); if(this.db) await this.db.collection("products").doc(id).set(data); else saveLocal(); },
-    async delProduct(id){ products.delete(id); render(); if(this.db) await this.db.collection("products").doc(id).delete(); else saveLocal(); },
-    async putItem(id, data){ list.set(id,data); render(); if(this.db) await this.db.collection("list").doc(id).set(data); else saveLocal(); },
-    async delItem(id){ list.delete(id); render(); if(this.db) await this.db.collection("list").doc(id).delete(); else saveLocal(); }
+    ref(col, id){ return doc(this.db, "households", code, col, id); },
+    async putProduct(id, data){ products.set(id,data); render(); if(this.db) await setDoc(this.ref("products",id), data); else saveLocal(); },
+    async delProduct(id){ products.delete(id); render(); if(this.db) await deleteDoc(this.ref("products",id)); else saveLocal(); },
+    async putItem(id, data){ list.set(id,data); render(); if(this.db) await setDoc(this.ref("list",id), data); else saveLocal(); },
+    async delItem(id){ list.delete(id); render(); if(this.db) await deleteDoc(this.ref("list",id)); else saveLocal(); }
   };
   async function safe(fn){
     try{ await fn(); }
-    catch(e){
-      if (e && e.code === "invalid_argument" && !readOnly){ readOnly = true; setStatus(); toast("Vous pouvez consulter la liste, mais pas la modifier."); }
-      else if (e && e.code === "quota_exceeded") toast("La liste est pleine : supprimez des produits.");
-      else toast("Modification non enregistrée, réessayez.");
-    }
+    catch(e){ console.error(e); toast("Modification non enregistrée, réessayez."); }
   }
 
   const LKEY = "courses-v1";
@@ -193,25 +221,49 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid 
     setStatus(); render();
   }
 
-  async function startShared(db){
+  async function startShared(){
+    const app = initializeApp(firebaseConfig);
+    const db = initializeFirestore(app, { localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) });
     store.db = db; mode = "shared"; setStatus();
-    let gotP = false, gotL = false;
-    db.collection("products").onSnapshot(snap=>{
-      products.clear(); snap.docs.forEach(d=>{ const v=d.data(); if(v) products.set(d.id,{name:v.name,cat:v.cat,fav:!!v.fav}); });
-      gotP = true; render();
-    }, ()=>{ mode="error"; setStatus(); });
-    db.collection("list").onSnapshot(snap=>{
-      list.clear(); snap.docs.forEach(d=>{ const v=d.data(); if(v) list.set(d.id,{name:v.name,cat:v.cat,done:!!v.done,at:v.at||0}); });
-      gotL = true; render();
-    }, ()=>{ mode="error"; setStatus(); });
+    $("invite").hidden = false;
+
+    // Première ouverture d'une liste vide : on ajoute les produits de départ (une seule fois)
+    const seedKey = "courses-seeded-" + code;
+    let seeded = false; try{ seeded = !!localStorage.getItem(seedKey); }catch(e){}
+    function seed(){
+      seeded = true; try{ localStorage.setItem(seedKey, "1"); }catch(e){}
+      const batch = writeBatch(db);
+      LOCAL_DEFAULTS.forEach(([n,c])=>batch.set(doc(db,"households",code,"products",newId(n)),{name:n,cat:c,fav:false}));
+      batch.commit().catch(e=>console.error(e));
+    }
+
+    onSnapshot(collection(db,"households",code,"products"), { includeMetadataChanges: true }, snap=>{
+      if (snap.empty && !snap.metadata.fromCache && !seeded) seed();
+      else if (!snap.empty && !seeded){ seeded = true; try{ localStorage.setItem(seedKey, "1"); }catch(e){} }
+      products.clear(); snap.docs.forEach(d=>{ const v=d.data(); products.set(d.id,{name:v.name,cat:v.cat,fav:!!v.fav}); });
+      render();
+    }, e=>{ console.error(e); mode="error"; setStatus(); });
+    onSnapshot(collection(db,"households",code,"list"), snap=>{
+      list.clear(); snap.docs.forEach(d=>{ const v=d.data(); list.set(d.id,{name:v.name,cat:v.cat,done:!!v.done,at:v.at||0}); });
+      render();
+    }, e=>{ console.error(e); mode="error"; setStatus(); });
   }
+
+  $("invite").onclick = async () => {
+    const url = location.href;
+    if (navigator.share){
+      try{ await navigator.share({ title:"Notre liste de courses", text:"Voici notre liste de courses partagée :", url }); return; }catch(e){ if (e.name === "AbortError") return; }
+    }
+    try{ await navigator.clipboard.writeText(url); toast("Lien copié : envoyez-le à votre conjointe"); }
+    catch(e){ prompt("Copiez ce lien et envoyez-le :", url); }
+  };
 
   function setStatus(){
     const s = $("status"), span = s.querySelector("span");
     s.classList.toggle("shared", mode === "shared");
-    span.textContent = mode === "shared" ? (readOnly ? "Liste partagée, en lecture seule" : "Liste partagée, mise à jour en direct")
-      : mode === "local" ? "Enregistrée sur cet appareil"
-      : mode === "error" ? "Connexion perdue, rechargez la page"
+    span.textContent = mode === "shared" ? "Liste partagée, mise à jour en direct"
+      : mode === "local" ? "Firebase pas encore configuré : liste enregistrée sur cet appareil"
+      : mode === "error" ? "Connexion à la base impossible : vérifiez la configuration Firebase"
       : "Chargement…";
   }
 
@@ -363,11 +415,8 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid 
 
   // ---------- Démarrage ----------
   render();
-  if (window.claude && typeof window.claude.use === "function"){
-    window.claude.use("db").then(db => db ? startShared(db) : startLocal()).catch(startLocal);
-  } else {
-    startLocal();
-  }
+  if (firebaseConfig.projectId && firebaseConfig.projectId !== "COLLEZ_ICI") startShared().catch(e=>{ console.error(e); mode="error"; setStatus(); });
+  else startLocal();
 })();
 </script>
 </body>
